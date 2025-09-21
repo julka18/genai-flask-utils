@@ -48,3 +48,65 @@ def generate_marketing_poster(product_name: str, price: str, description: str, l
 
     except Exception as e:
         return {"success": False, "message": f"Error: {str(e)} | Trace: {traceback.format_exc()}", "poster_bytes": None}
+
+
+def generate_product_caption(product_name: str, price: str, description: str, location: str, industry: str):
+    """
+    Generate a storytelling caption for a product in marketplaces using Google GenAI.
+
+    Args:
+        product_name (str): Name of the product.
+        price (str): Price of the product.
+        description (str): Product description.
+        location (str): Target market location.
+        industry (str): Industry or niche.
+
+    Returns:
+        dict: {
+            "success": bool,
+            "message": str,
+            "caption": str (if success else None)
+        }
+    """
+    try:
+        # Build prompt for storytelling caption
+        prompt = (
+            f"Write a captivating, storytelling product description suitable for marketplaces like Amazon or Flipkart. "
+            f"Use 4-5 engaging lines. Highlight the product's uniqueness and value, "
+            f"make it relatable to the target audience, and subtly include the price.\n\n"
+            f"Product Details:\n"
+            f"- Name: {product_name}\n"
+            f"- Price: {price}\n"
+            f"- Description: {description}\n"
+            f"- Location: {location}\n"
+            f"- Industry: {industry}\n\n"
+            f"Output a concise, memorable, and persuasive description in natural language."
+        )
+
+        # Call Gemini API
+        response = client.models.generate_content(
+            model="gemini-2.5",
+            contents=[prompt]
+        )
+
+        # Extract text output
+        for part in response.candidates[0].content.parts:
+            if part.text:
+                return {
+                    "success": True,
+                    "message": "Caption generated successfully",
+                    "caption": part.text.strip()
+                }
+
+        return {
+            "success": False,
+            "message": "No caption generated in response",
+            "caption": None
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"Error: {str(e)} | Trace: {traceback.format_exc()}",
+            "caption": None
+        }
