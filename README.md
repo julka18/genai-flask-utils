@@ -1,8 +1,11 @@
 
-# 📢 Poster Generation API — Developer Guide
+# 📢 Poster & Caption Generation API — Developer Guide
 
-This project provides a **Flask API** for generating marketing posters using **Google GenAI (Gemini)**.
-It takes product details + an image path and returns a **poster (base64 encoded)**.
+This project provides a **Flask API** powered by **Google GenAI (Gemini)** to help with product marketing.
+It includes:
+
+* 🖼️ Poster generation (`/generate-poster`)
+* ✍️ Storytelling caption generation (`/generate-caption`)
 
 ---
 
@@ -15,7 +18,7 @@ Unzip the `poster_api.zip` you received into a folder, e.g.:
 ```
 poster_api/
  ├── app.py
- ├── poster_generator.py
+ ├── poster_generator.py     # Poster + Caption functions
  ├── requirements.txt
  └── README.md
 ```
@@ -53,7 +56,7 @@ Activate it:
 pip install -r requirements.txt
 ```
 
-This will install:
+This installs:
 
 * `flask`
 * `pillow`
@@ -61,16 +64,15 @@ This will install:
 
 ---
 
-### 4. Set API Key
+### 4. Add Google API Key
 
-In **poster\_generator.py**, replace:
+In **poster\_generator.py**, set your **API key**:
 
 ```python
 client = genai.Client(api_key="YOUR_API_KEY")
 ```
 
-with your **Google API Key**.
-⚠️ Keep this private — never commit/share your real key.
+⚠️ Do **not** commit or share your real API key.
 
 ---
 
@@ -80,7 +82,7 @@ with your **Google API Key**.
 python app.py
 ```
 
-The API will start at:
+Server will start at:
 
 ```
 http://127.0.0.1:8080
@@ -88,15 +90,15 @@ http://127.0.0.1:8080
 
 ---
 
-## 📡 Usage
+## 📡 API Endpoints
 
-### Endpoint
+### 1️⃣ Generate Poster
 
 ```
 POST /generate-poster
 ```
 
-### Request Body (JSON)
+**Request Body (JSON):**
 
 ```json
 {
@@ -109,11 +111,55 @@ POST /generate-poster
 }
 ```
 
-👉 `product_image_path` should be the path to an existing image file on your machine (e.g. `watch.png` in the same folder).
+👉 `product_image_path` should be the **path to a valid image file** on your machine.
+
+**Response (JSON):**
+
+```json
+{
+  "success": true,
+  "message": "Poster generated successfully",
+  "poster_base64": "<base64 encoded PNG>"
+}
+```
+
+You can decode `poster_base64` to save the poster image.
 
 ---
 
-### Example with curl
+### 2️⃣ Generate Caption
+
+```
+POST /generate-caption
+```
+
+**Request Body (JSON):**
+
+```json
+{
+  "product_name": "Luxury Watch",
+  "price": "$499",
+  "description": "Premium wristwatch with marble finish",
+  "location": "New York",
+  "industry": "Luxury"
+}
+```
+
+**Response (JSON):**
+
+```json
+{
+  "success": true,
+  "message": "Caption generated successfully",
+  "caption": "Timeless elegance on your wrist. This luxury watch, priced at $499, blends..."
+}
+```
+
+---
+
+## 📌 Example Usage
+
+### Test Poster Generation (curl)
 
 ```bash
 curl -X POST http://127.0.0.1:8080/generate-poster \
@@ -128,13 +174,38 @@ curl -X POST http://127.0.0.1:8080/generate-poster \
          }'
 ```
 
+### Test Caption Generation (curl)
+
+```bash
+curl -X POST http://127.0.0.1:8080/generate-caption \
+     -H "Content-Type: application/json" \
+     -d '{
+           "product_name": "Luxury Watch",
+           "price": "$499",
+           "description": "Premium wristwatch with marble finish",
+           "location": "New York",
+           "industry": "Luxury"
+         }'
+```
+
 ---
 
-### Example with Python
+### Test with Python Client
 
 ```python
 import requests, base64
 
+# Generate Caption
+resp = requests.post("http://127.0.0.1:8080/generate-caption", json={
+    "product_name": "Luxury Watch",
+    "price": "$499",
+    "description": "Premium wristwatch with marble finish",
+    "location": "New York",
+    "industry": "Luxury"
+})
+print(resp.json())
+
+# Generate Poster
 resp = requests.post("http://127.0.0.1:8080/generate-poster", json={
     "product_name": "Luxury Watch",
     "price": "$499",
@@ -143,13 +214,11 @@ resp = requests.post("http://127.0.0.1:8080/generate-poster", json={
     "industry": "Luxury",
     "product_image_path": "watch.png"
 })
+data = resp.json()
 
-print(resp.json()["message"])
-poster_base64 = resp.json().get("poster_base64")
-
-if poster_base64:
+if data.get("poster_base64"):
     with open("poster.png", "wb") as f:
-        f.write(base64.b64decode(poster_base64))
+        f.write(base64.b64decode(data["poster_base64"]))
     print("Poster saved as poster.png")
 ```
 
@@ -157,11 +226,9 @@ if poster_base64:
 
 ## 🧪 Notes
 
-* If you open `http://127.0.0.1:8080` in a browser, you’ll see **404** — this is expected. Use a **POST request** only.
-* Make sure the image path you pass (`product_image_path`) points to a valid file on your PC.
-* This setup uses Flask’s development server — fine for local testing. For production, we’d use Docker + Gunicorn/Cloud Run.
+* Opening `http://127.0.0.1:8080` in a browser will return **404**. Only **POST requests** are supported.
+* `405` means you tried `GET` instead of `POST`.
+* Ensure the `product_image_path` points to a valid image file.
+* For production, use Docker + Gunicorn/Uvicorn (this is Flask dev server).
 
----
-
-✅ That’s it! You can now generate posters by sending product details + an image to the API.
 
