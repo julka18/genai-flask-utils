@@ -85,7 +85,7 @@ def generate_product_caption(product_name: str, price: str, description: str, lo
 
         # Call Gemini API
         response = client.models.generate_content(
-            model="gemini-2.5",
+            model="gemini-2.5-flash",
             contents=[prompt]
         )
 
