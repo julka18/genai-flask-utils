@@ -107,7 +107,7 @@ POST /generate-poster
   "description": "Premium wristwatch with marble finish",
   "location": "New York",
   "industry": "Luxury",
-  "product_image_path": "watch.png"
+  "product_image_base64": {YOUR BASE 64 STRING}
 }
 ```
 
@@ -170,7 +170,7 @@ curl -X POST http://127.0.0.1:8080/generate-poster \
            "description": "Premium wristwatch with marble finish",
            "location": "New York",
            "industry": "Luxury",
-           "product_image_path": "watch.png"
+           "product_image_base64": base64
          }'
 ```
 
@@ -212,7 +212,7 @@ resp = requests.post("http://127.0.0.1:8080/generate-poster", json={
     "description": "Premium wristwatch with marble finish",
     "location": "New York",
     "industry": "Luxury",
-    "product_image_path": "watch.png"
+    "product_image_base64": "YOUR-BASE64-STRING"
 })
 data = resp.json()
 
