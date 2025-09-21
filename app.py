@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 import base64
-from poster_generator import generate_marketing_poster
+from poster_generator import generate_marketing_poster, generate_product_caption
 
 app = Flask(__name__)
 
